@@ -28,23 +28,7 @@ func NewEvent(props EventProps) (*EventAggregate, error) {
 
 	event := &EventAggregate{id: uuid.New().String()}
 
-	if err := event.setName(props.Name); err != nil {
-		return nil, err
-	}
-
-	if err := event.setDescription(props.Description); err != nil {
-		return nil, err
-	}
-
-	if err := event.setLocation(props.Location); err != nil {
-		return nil, err
-	}
-
-	if err := event.setDateTime(props.DateTime); err != nil {
-		return nil, err
-	}
-
-	if err := event.setUserId(props.UserId); err != nil {
+	if err := event.build(props); err != nil {
 		return nil, err
 	}
 
@@ -55,38 +39,54 @@ func LoadEvent(props EventProps, id string) (*EventAggregate, error) {
 
 	event := &EventAggregate{}
 
-	if err := event.setId(id); err != nil {
+	err := event.setId(id)
+
+	if err != nil {
 		return nil, err
 	}
 
-	if err := event.setName(props.Name); err != nil {
-		return nil, err
-	}
+	err = event.build(props)
 
-	if err := event.setDescription(props.Description); err != nil {
-		return nil, err
-	}
-
-	if err := event.setLocation(props.Location); err != nil {
-		return nil, err
-	}
-
-	if err := event.setDateTime(props.DateTime); err != nil {
-		return nil, err
-	}
-
-	if err := event.setUserId(props.UserId); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
 	return event, nil
 }
 
+func (e *EventAggregate) UpdateEvent(props EventProps) error {
+	return e.build(props)
+}
+
+func (e *EventAggregate) build(props EventProps) error {
+	if err := e.setName(props.Name); err != nil {
+		return err
+	}
+
+	if err := e.setDescription(props.Description); err != nil {
+		return err
+	}
+
+	if err := e.setLocation(props.Location); err != nil {
+		return err
+	}
+
+	if err := e.setDateTime(props.DateTime); err != nil {
+		return err
+	}
+
+	if err := e.setUserId(props.UserId); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (e *EventAggregate) setId(id string) error {
 	_, err := uuid.Parse(id)
 
 	if err != nil {
-		return apiErrors.NewInvalidPropsException("id is invalid")
+		return apiErrors.NewInvalidPropsError("id is invalid")
 	}
 
 	e.id = id
@@ -96,7 +96,7 @@ func (e *EventAggregate) setId(id string) error {
 
 func (e *EventAggregate) setName(name string) error {
 	if name == "" {
-		return apiErrors.NewInvalidPropsException("name is required")
+		return apiErrors.NewInvalidPropsError("name is required")
 	}
 	e.name = name
 
@@ -105,7 +105,7 @@ func (e *EventAggregate) setName(name string) error {
 
 func (e *EventAggregate) setDescription(description string) error {
 	if description == "" {
-		return apiErrors.NewInvalidPropsException("description is required")
+		return apiErrors.NewInvalidPropsError("description is required")
 	}
 	e.description = description
 
@@ -114,7 +114,7 @@ func (e *EventAggregate) setDescription(description string) error {
 
 func (e *EventAggregate) setLocation(location string) error {
 	if location == "" {
-		return apiErrors.NewInvalidPropsException("location is required")
+		return apiErrors.NewInvalidPropsError("location is required")
 	}
 	e.location = location
 
@@ -123,7 +123,7 @@ func (e *EventAggregate) setLocation(location string) error {
 
 func (e *EventAggregate) setDateTime(dateTime time.Time) error {
 	if dateTime.IsZero() {
-		return apiErrors.NewInvalidPropsException("dateTime is required")
+		return apiErrors.NewInvalidPropsError("dateTime is required")
 	}
 	e.dateTime = dateTime
 
@@ -132,7 +132,7 @@ func (e *EventAggregate) setDateTime(dateTime time.Time) error {
 
 func (e *EventAggregate) setUserId(userId string) error {
 	if userId == "" {
-		return apiErrors.NewInvalidPropsException("userId is required")
+		return apiErrors.NewInvalidPropsError("userId is required")
 	}
 	e.userId = userId
 

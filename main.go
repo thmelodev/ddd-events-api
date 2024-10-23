@@ -6,6 +6,7 @@ import (
 
 	"github.com/thmelodev/ddd-events-api/src/modules/events"
 	"github.com/thmelodev/ddd-events-api/src/providers/config"
+	"github.com/thmelodev/ddd-events-api/src/providers/db"
 	"github.com/thmelodev/ddd-events-api/src/providers/httpServer"
 	"github.com/thmelodev/ddd-events-api/src/utils/logger"
 	"go.uber.org/fx"
@@ -28,6 +29,7 @@ func main() {
 
 	app := fx.New(
 		loggerOption,
+		db.Module(),
 		fx.Provide(config.Init),
 		httpServer.Module(),
 		events.Module(),

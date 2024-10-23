@@ -1,18 +1,23 @@
 package repositories
 
 import (
+	"fmt"
+
 	"github.com/thmelodev/ddd-events-api/src/modules/events/domain"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/mappers"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/models"
 	"github.com/thmelodev/ddd-events-api/src/providers/db"
+	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
+	"gorm.io/gorm"
 )
 
+var _ IEventRepository = (*EventRepository)(nil)
+
 type IEventRepository interface {
-	Create(event *domain.EventAggregate) error
-	// FindById(id string) (*domain.EventAggregate, error)
+	Save(event *domain.EventAggregate) error
+	FindById(id string) (*domain.EventAggregate, error)
 	FindAll() ([]*domain.EventAggregate, error)
-	// Update(event *domain.EventAggregate) error
-	// Delete(id string) error
+	Delete(event *domain.EventAggregate) error
 }
 
 type EventRepository struct {
@@ -24,11 +29,13 @@ func NewEventRepository(db *db.GormDatabase, eventMapper *mappers.EventMapper) *
 	return &EventRepository{db: db, eventMapper: eventMapper}
 }
 
-func (r *EventRepository) Create(event *domain.EventAggregate) error {
+func (r *EventRepository) Save(event *domain.EventAggregate) error {
 	model := r.eventMapper.ToModel(event)
-	if err := r.db.DB.Create(model).Error; err != nil {
-		return err
+
+	if err := r.db.DB.Save(model).Error; err != nil {
+		return fmt.Errorf("failed to upsert event with ID %s: %w", event.GetId(), err)
 	}
+
 	return nil
 }
 
@@ -48,4 +55,35 @@ func (r *EventRepository) FindAll() ([]*domain.EventAggregate, error) {
 	}
 
 	return events, nil
+}
+
+func (r *EventRepository) FindById(id string) (*domain.EventAggregate, error) {
+	var model models.Event
+
+	if err := r.db.DB.Where("id = ?", id).First(&model).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, apiErrors.NewRepositoryError(fmt.Errorf("event with id %s not found", id).Error())
+		}
+		return nil, apiErrors.NewRepositoryError(fmt.Errorf("failed to find event by id %s: %w", id, err).Error())
+	}
+
+	eventAggregate, err := r.eventMapper.ToDomain(&model)
+
+	if err != nil {
+		return nil, apiErrors.NewRepositoryError(fmt.Errorf("failed to map event model to domain aggregate: %w", err).Error())
+	}
+
+	return eventAggregate, nil
+}
+
+func (r *EventRepository) Delete(event *domain.EventAggregate) error {
+	model := r.eventMapper.ToModel(event)
+
+	if err := r.db.DB.Delete(model).Error; err != nil {
+		return apiErrors.NewInvalidPropsError(
+			fmt.Errorf("failed to delete event with ID %s: %w", event.GetId(), err).Error(),
+		)
+	}
+
+	return nil
 }

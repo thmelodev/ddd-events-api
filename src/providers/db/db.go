@@ -52,14 +52,14 @@ func NewDatabase(config *config.Config) (*GormDatabase, error) {
 	}
 
 	if err != nil {
-		log.Errorf("failed to connect to database, error: %s", err)
-		return nil, err
+		errorMessage := fmt.Errorf("failed to connect to database, error: %s", err)
+		panic(errorMessage)
 	}
 
 	sqlDb, err := db.DB()
 	if err != nil {
-		log.Errorf("failed to get sql.DB from gorm.DB, error: %s", err)
-		return nil, err
+		errorMessage := fmt.Errorf("failed to get sql.DB from gorm.DB, error: %s", err)
+		panic(errorMessage)
 	}
 
 	sqlDb.SetMaxIdleConns(config.Db.MaxIdleConnections)

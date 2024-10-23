@@ -29,7 +29,7 @@ func Get() Config {
 
 func Init() *Config {
 	cfg := Config{}
-	load("go-rest-api", &cfg)
+	load("ddd-events-api", &cfg)
 	_global.Store(cfg)
 	return &cfg
 }

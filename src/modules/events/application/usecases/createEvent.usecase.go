@@ -1,10 +1,11 @@
-package usecase
+package usecases
 
 import (
 	"context"
 	"fmt"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/domain"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
@@ -17,12 +18,11 @@ type CreateEventUsecase struct {
 }
 
 type CreateEventDTO struct {
-	Id          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Location    string    `json:"location"`
 	DateTime    time.Time `json:"dateTime"`
-	UserID      string    `json:"userID"`
+	UserId      string    `json:"userId"`
 }
 
 func NewCreateEventUsecase(
@@ -35,8 +35,9 @@ func NewCreateEventUsecase(
 
 func (u CreateEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
 	eventDTO, ok := dto.(*CreateEventDTO)
+
 	if !ok {
-		return nil, apiErrors.NewInvalidPropsException(fmt.Errorf("invalid props: %v", dto).Error())
+		return nil, apiErrors.NewRepositoryError(fmt.Errorf("invalid props: %v, invalid type: %t", dto, dto).Error())
 	}
 
 	event, err := domain.NewEvent(domain.EventProps{
@@ -44,16 +45,16 @@ func (u CreateEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
 		Description: eventDTO.Description,
 		Location:    eventDTO.Location,
 		DateTime:    eventDTO.DateTime,
-		UserId:      eventDTO.UserID,
+		UserId:      eventDTO.UserId,
 	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err = u.eventRepository.Create(event); err != nil {
+	if err = u.eventRepository.Save(event); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return gin.H{"id": event.GetId()}, nil
 }
