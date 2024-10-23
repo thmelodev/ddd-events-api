@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/models"
+	usersModels "github.com/thmelodev/ddd-events-api/src/modules/auth/infra/models"
+	eventsModel "github.com/thmelodev/ddd-events-api/src/modules/events/infra/models"
 	"github.com/thmelodev/ddd-events-api/src/providers/config"
 	"github.com/thmelodev/ddd-events-api/src/utils/logger"
 	"gorm.io/driver/postgres"
@@ -66,9 +67,33 @@ func NewDatabase(config *config.Config) (*GormDatabase, error) {
 	sqlDb.SetMaxOpenConns(config.Db.MaxOpenConnections)
 	sqlDb.SetConnMaxLifetime(config.Db.ConnectionMaxLifetime)
 
-	db.AutoMigrate(&models.EventModel{})
+	db.AutoMigrate(&eventsModel.EventModel{}, &usersModels.UserModel{})
+
+	createAdminUser(db)
 
 	return &GormDatabase{
 		DB: db,
 	}, nil
+}
+
+func createAdminUser(db *gorm.DB) {
+	var admin usersModels.UserModel
+	result := db.First(&admin, "email = ?", "admin@teste.com")
+
+	if result.Error != nil && result.Error == gorm.ErrRecordNotFound {
+		admin = usersModels.UserModel{
+			Email:    "admin@teste.com",
+			Password: "123456",
+		}
+
+		if err := db.Create(&admin).Error; err != nil {
+			fmt.Printf("Failed to create admin user: %v\n", err)
+		} else {
+			fmt.Println("Admin user created successfully.")
+		}
+	} else if result.Error != nil {
+		fmt.Printf("Error checking admin user: %v\n", result.Error)
+	} else {
+		fmt.Println("Admin user already exists.")
+	}
 }

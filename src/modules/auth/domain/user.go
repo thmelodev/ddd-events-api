@@ -1,14 +1,13 @@
-package user
+package domain
 
 import (
 	"github.com/google/uuid"
-	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain/email"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 )
 
 type UserAggregate struct {
 	id       string
-	email    *email.EmailValueObject
+	email    *EmailValueObject
 	password string
 }
 
@@ -17,7 +16,7 @@ type UserProps struct {
 	Password string
 }
 
-func New(props UserProps) (*UserAggregate, error) {
+func NewUser(props UserProps) (*UserAggregate, error) {
 	user := &UserAggregate{id: uuid.New().String()}
 
 	err := user.build(UserProps{
@@ -32,7 +31,7 @@ func New(props UserProps) (*UserAggregate, error) {
 	return user, nil
 }
 
-func Load(props UserProps, id string) (*UserAggregate, error) {
+func LoadUser(props UserProps, id string) (*UserAggregate, error) {
 	user := &UserAggregate{}
 
 	user.setId(id)
@@ -76,7 +75,7 @@ func (u *UserAggregate) build(props UserProps) error {
 
 func (u *UserAggregate) setEmail(e string) error {
 
-	emailValueObject, err := email.New(e)
+	emailValueObject, err := NewEmail(e)
 
 	if err != nil {
 		return err

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/event"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
@@ -48,7 +48,7 @@ func (u UpdateEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
 		return nil, err
 	}
 
-	err = e.Update(event.EventProps{
+	err = e.UpdateEvent(domain.EventProps{
 		Name:        eventDTO.Name,
 		Description: eventDTO.Description,
 		Location:    eventDTO.Location,

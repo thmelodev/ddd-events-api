@@ -62,7 +62,7 @@ func (ec *EventsController) registerRoutes() {
 }
 
 func (ec *EventsController) health(ctx *gin.Context) {
-	ctx.JSON(200, gin.H{
+	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Hello World",
 	})
 }
@@ -71,10 +71,10 @@ func (ec *EventsController) getEvents(ctx *gin.Context) {
 	result, err := ec.getEventsQuery.Execute(ctx, nil)
 
 	if err != nil {
-		ctx.JSON(400, err)
+		ctx.Error(err)
 	}
 
-	ctx.JSON(200, result)
+	ctx.JSON(http.StatusOK, result)
 }
 
 func (ec *EventsController) createEvent(ctx *gin.Context) {
@@ -91,7 +91,7 @@ func (ec *EventsController) createEvent(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(201, result)
+	ctx.JSON(http.StatusCreated, result)
 }
 
 func (ec *EventsController) getEventById(ctx *gin.Context) {

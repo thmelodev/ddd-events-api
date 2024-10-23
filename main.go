@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/thmelodev/ddd-events-api/src/modules/auth"
 	"github.com/thmelodev/ddd-events-api/src/modules/events"
 	"github.com/thmelodev/ddd-events-api/src/providers/config"
 	"github.com/thmelodev/ddd-events-api/src/providers/db"
@@ -33,6 +34,7 @@ func main() {
 		fx.Provide(config.Init),
 		httpServer.Module(),
 		events.Module(),
+		auth.Module(),
 	)
 
 	app.Run()

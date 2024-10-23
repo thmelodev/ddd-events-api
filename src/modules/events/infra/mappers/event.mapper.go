@@ -1,7 +1,7 @@
 package mappers
 
 import (
-	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/event"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/models"
 )
 
@@ -11,7 +11,7 @@ func NewEventMapper() *EventMapper {
 	return &EventMapper{}
 }
 
-func (m *EventMapper) ToModel(event *event.EventAggregate) *models.EventModel {
+func (m *EventMapper) ToModel(event *domain.EventAggregate) *models.EventModel {
 	return &models.EventModel{
 		Id:          event.GetId(),
 		Name:        event.GetName(),
@@ -22,8 +22,8 @@ func (m *EventMapper) ToModel(event *event.EventAggregate) *models.EventModel {
 	}
 }
 
-func (m *EventMapper) ToDomain(e *models.EventModel) (*event.EventAggregate, error) {
-	domain, err := event.Load(event.EventProps{
+func (m *EventMapper) ToDomain(e *models.EventModel) (*domain.EventAggregate, error) {
+	domain, err := domain.LoadEvent(domain.EventProps{
 		Name:        e.Name,
 		Description: e.Description,
 		Location:    e.Location,

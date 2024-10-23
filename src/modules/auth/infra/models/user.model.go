@@ -1,6 +1,11 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type UserModel struct {
 	Id        string     `json:"id" gorm:"primaryKey"`
@@ -10,6 +15,13 @@ type UserModel struct {
 	UpdatedAt *time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-func (UserModel) TableName() string {
+func (user *UserModel) BeforeCreate(tx *gorm.DB) (err error) {
+	if user.Id == "" {
+		user.Id = uuid.New().String()
+	}
+	return
+}
+
+func (*UserModel) TableName() string {
 	return "users"
 }

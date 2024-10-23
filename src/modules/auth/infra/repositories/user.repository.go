@@ -3,7 +3,7 @@ package repositories
 import (
 	"fmt"
 
-	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain/user"
+	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/mappers"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/models"
 	"github.com/thmelodev/ddd-events-api/src/providers/db"
@@ -11,19 +11,24 @@ import (
 	"gorm.io/gorm"
 )
 
-type IUserRepository interface{}
+var _ IUserRepository = (*UserRepository)(nil)
+
+type IUserRepository interface {
+	Save(u *domain.UserAggregate) error
+	FindByEmail(email string) (*domain.UserAggregate, error)
+}
 
 type UserRepository struct {
 	db         *db.GormDatabase
-	userMapper mappers.UserMapper
+	userMapper *mappers.UserMapper
 }
 
-func NewUserRepository(db *db.GormDatabase, userMapper mappers.UserMapper) *UserRepository {
+func NewUserRepository(db *db.GormDatabase, userMapper *mappers.UserMapper) *UserRepository {
 	return &UserRepository{db: db, userMapper: userMapper}
 }
 
-func (r *UserRepository) Save(u user.UserAggregate) error {
-	model := r.userMapper.ToModel(&u)
+func (r *UserRepository) Save(u *domain.UserAggregate) error {
+	model := r.userMapper.ToModel(u)
 
 	if err := r.db.DB.Save(model).Error; err != nil {
 		return err
@@ -32,7 +37,7 @@ func (r *UserRepository) Save(u user.UserAggregate) error {
 	return nil
 }
 
-func (r *UserRepository) FindByEmail(email string) (*user.UserAggregate, error) {
+func (r *UserRepository) FindByEmail(email string) (*domain.UserAggregate, error) {
 	model := &models.UserModel{}
 	if err := r.db.DB.Where("email = ?", email).First(model).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {

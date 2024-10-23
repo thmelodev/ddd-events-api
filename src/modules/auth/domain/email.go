@@ -1,4 +1,4 @@
-package email
+package domain
 
 import (
 	"regexp"
@@ -12,7 +12,7 @@ type EmailValueObject struct {
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`)
 
-func New(value string) (*EmailValueObject, error) {
+func NewEmail(value string) (*EmailValueObject, error) {
 	if !isValidEmail(value) {
 		return nil, apiErrors.NewInvalidPropsError("invalid email format")
 	}

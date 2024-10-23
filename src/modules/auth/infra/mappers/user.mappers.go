@@ -1,7 +1,7 @@
 package mappers
 
 import (
-	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain/user"
+	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/models"
 )
 
@@ -11,7 +11,7 @@ func NewUserMapper() *UserMapper {
 	return &UserMapper{}
 }
 
-func (m *UserMapper) ToModel(user *user.UserAggregate) *models.UserModel {
+func (m *UserMapper) ToModel(user *domain.UserAggregate) *models.UserModel {
 	return &models.UserModel{
 		Id:       user.GetId(),
 		Email:    user.GetEmail(),
@@ -19,8 +19,8 @@ func (m *UserMapper) ToModel(user *user.UserAggregate) *models.UserModel {
 	}
 }
 
-func (m *UserMapper) ToDomain(u *models.UserModel) (*user.UserAggregate, error) {
-	domain, err := user.Load(user.UserProps{
+func (m *UserMapper) ToDomain(u *models.UserModel) (*domain.UserAggregate, error) {
+	domain, err := domain.LoadUser(domain.UserProps{
 		Email:    u.Email,
 		Password: u.Password,
 	}, u.Id)
