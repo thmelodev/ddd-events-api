@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/thmelodev/ddd-events-api/src/modules/events/domain"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/event"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
+	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
 
-var _ IUsecase = (*CreateEventUsecase)(nil)
+var _ interfaces.IUsecase = (*CreateEventUsecase)(nil)
 
 type CreateEventUsecase struct {
 	eventRepository repositories.IEventRepository
@@ -40,7 +41,7 @@ func (u CreateEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
 		return nil, apiErrors.NewRepositoryError(fmt.Errorf("invalid props: %v, invalid type: %t", dto, dto).Error())
 	}
 
-	event, err := domain.NewEvent(domain.EventProps{
+	e, err := event.New(event.EventProps{
 		Name:        eventDTO.Name,
 		Description: eventDTO.Description,
 		Location:    eventDTO.Location,
@@ -52,9 +53,9 @@ func (u CreateEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
 		return nil, err
 	}
 
-	if err = u.eventRepository.Save(event); err != nil {
+	if err = u.eventRepository.Save(e); err != nil {
 		return nil, err
 	}
 
-	return gin.H{"id": event.GetId()}, nil
+	return gin.H{"id": e.GetId()}, nil
 }

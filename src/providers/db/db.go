@@ -66,7 +66,7 @@ func NewDatabase(config *config.Config) (*GormDatabase, error) {
 	sqlDb.SetMaxOpenConns(config.Db.MaxOpenConnections)
 	sqlDb.SetConnMaxLifetime(config.Db.ConnectionMaxLifetime)
 
-	db.AutoMigrate(&models.Event{})
+	db.AutoMigrate(&models.EventModel{})
 
 	return &GormDatabase{
 		DB: db,

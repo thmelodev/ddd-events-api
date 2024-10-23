@@ -1,4 +1,4 @@
-package domain
+package event
 
 import (
 	"time"
@@ -24,8 +24,7 @@ type EventAggregate struct {
 	userId      string
 }
 
-func NewEvent(props EventProps) (*EventAggregate, error) {
-
+func New(props EventProps) (*EventAggregate, error) {
 	event := &EventAggregate{id: uuid.New().String()}
 
 	if err := event.build(props); err != nil {
@@ -35,7 +34,7 @@ func NewEvent(props EventProps) (*EventAggregate, error) {
 	return event, nil
 }
 
-func LoadEvent(props EventProps, id string) (*EventAggregate, error) {
+func Load(props EventProps, id string) (*EventAggregate, error) {
 
 	event := &EventAggregate{}
 
@@ -54,7 +53,7 @@ func LoadEvent(props EventProps, id string) (*EventAggregate, error) {
 	return event, nil
 }
 
-func (e *EventAggregate) UpdateEvent(props EventProps) error {
+func (e *EventAggregate) Update(props EventProps) error {
 	return e.build(props)
 }
 

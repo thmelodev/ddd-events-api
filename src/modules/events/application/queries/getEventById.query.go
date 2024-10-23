@@ -6,9 +6,10 @@ import (
 
 	"github.com/thmelodev/ddd-events-api/src/modules/events/application/mappers"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
 
-var _ IQuery = (*GetEventByIdQuery)(nil)
+var _ interfaces.IQuery = (*GetEventByIdQuery)(nil)
 
 type GetEventByIdQuery struct {
 	eventRepository repositories.IEventRepository

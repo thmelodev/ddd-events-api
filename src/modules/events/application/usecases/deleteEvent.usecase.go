@@ -6,9 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
 
-var _ IUsecase = (*DeleteEventUsecase)(nil)
+var _ interfaces.IUsecase = (*DeleteEventUsecase)(nil)
 
 type DeleteEventUsecase struct {
 	eventRepository repositories.IEventRepository

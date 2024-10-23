@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Event struct {
+type EventModel struct {
 	Id          string     `json:"id" gorm:"primaryKey"`
 	Name        string     `json:"name" gorm:"not null"`
 	Description string     `json:"description" gorm:"not null"`
@@ -13,6 +13,6 @@ type Event struct {
 	UpdatedAt   *time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
-func (Event) TableName() string {
+func (EventModel) TableName() string {
 	return "events"
 }

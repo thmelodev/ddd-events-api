@@ -51,7 +51,7 @@ func NewEventsController(
 	return controller
 }
 
-func (ec EventsController) registerRoutes() {
+func (ec *EventsController) registerRoutes() {
 	ec.httpServer.AppGroup.GET("/health", ec.health)
 	ec.httpServer.AppGroup.GET("", ec.getEvents)
 	ec.httpServer.AppGroup.GET("/:id", ec.getEventById)
@@ -61,13 +61,13 @@ func (ec EventsController) registerRoutes() {
 
 }
 
-func (ec EventsController) health(ctx *gin.Context) {
+func (ec *EventsController) health(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"message": "Hello World",
 	})
 }
 
-func (ec EventsController) getEvents(ctx *gin.Context) {
+func (ec *EventsController) getEvents(ctx *gin.Context) {
 	result, err := ec.getEventsQuery.Execute(ctx, nil)
 
 	if err != nil {
@@ -77,7 +77,7 @@ func (ec EventsController) getEvents(ctx *gin.Context) {
 	ctx.JSON(200, result)
 }
 
-func (ec EventsController) createEvent(ctx *gin.Context) {
+func (ec *EventsController) createEvent(ctx *gin.Context) {
 	var event usecases.CreateEventDTO
 	if err := ctx.ShouldBindJSON(&event); err != nil {
 		ctx.Error(apiErrors.NewInvalidPropsError(err.Error()))
@@ -94,7 +94,7 @@ func (ec EventsController) createEvent(ctx *gin.Context) {
 	ctx.JSON(201, result)
 }
 
-func (ec EventsController) getEventById(ctx *gin.Context) {
+func (ec *EventsController) getEventById(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	result, err := ec.getEventByIdQuery.Execute(ctx, id)
@@ -107,7 +107,7 @@ func (ec EventsController) getEventById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-func (ec EventsController) deleteEvent(ctx *gin.Context) {
+func (ec *EventsController) deleteEvent(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	result, err := ec.deleteEventUsecase.Execute(ctx, id)
@@ -120,7 +120,7 @@ func (ec EventsController) deleteEvent(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-func (ec EventsController) updateEvent(ctx *gin.Context) {
+func (ec *EventsController) updateEvent(ctx *gin.Context) {
 	id := ctx.Param("id")
 
 	var event usecases.UpdateEventDTO
