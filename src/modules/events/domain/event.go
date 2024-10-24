@@ -15,6 +15,13 @@ type EventProps struct {
 	UserId      string
 }
 
+type UpdateEventProps struct {
+	Name        string
+	Description string
+	Location    string
+	DateTime    time.Time
+}
+
 type EventAggregate struct {
 	id          string
 	name        string
@@ -74,8 +81,10 @@ func (e *EventAggregate) build(props EventProps) error {
 		return err
 	}
 
-	if err := e.setUserId(props.UserId); err != nil {
-		return err
+	if e.userId == "" {
+		if err := e.setUserId(props.UserId); err != nil {
+			return err
+		}
 	}
 
 	return nil

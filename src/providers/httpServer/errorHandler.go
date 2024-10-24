@@ -23,6 +23,11 @@ func ErrorHandler() gin.HandlerFunc {
 					"error":   errorType,
 					"message": e.Error(),
 				})
+			case *apiErrors.UnauthorizedError:
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"error":   errorType,
+					"message": e.Error(),
+				})
 			default:
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error":   "InternalServerError",

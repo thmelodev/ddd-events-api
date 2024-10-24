@@ -23,7 +23,7 @@ type CreateEventDTO struct {
 	Description string    `json:"description"`
 	Location    string    `json:"location"`
 	DateTime    time.Time `json:"dateTime"`
-	UserId      string    `json:"userId"`
+	UserId      string    `json:"-"`
 }
 
 func NewCreateEventUsecase(

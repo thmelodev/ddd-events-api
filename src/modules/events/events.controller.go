@@ -12,13 +12,14 @@ import (
 )
 
 type EventsController struct {
-	conf               *config.Config
-	httpServer         *httpServer.HttpServer
-	createEventUsecase *usecases.CreateEventUsecase
-	deleteEventUsecase *usecases.DeleteEventUsecase
-	updateEventUsecase *usecases.UpdateEventUsecase
-	getEventsQuery     *queries.GetEventsQuery
-	getEventByIdQuery  *queries.GetEventByIdQuery
+	conf                  *config.Config
+	httpServer            *httpServer.HttpServer
+	createEventUsecase    *usecases.CreateEventUsecase
+	deleteEventUsecase    *usecases.DeleteEventUsecase
+	updateEventUsecase    *usecases.UpdateEventUsecase
+	getEventsQuery        *queries.GetEventsQuery
+	getEventByIdQuery     *queries.GetEventByIdQuery
+	getEventByUserIdQuery *queries.GetEventByUserIdQuery
 }
 
 func NewEventsController(
@@ -29,36 +30,36 @@ func NewEventsController(
 	updateEventUsecase *usecases.UpdateEventUsecase,
 	getEventsQuery *queries.GetEventsQuery,
 	getEventByIdQuery *queries.GetEventByIdQuery,
+	getEventByUserIdQuery *queries.GetEventByUserIdQuery,
 ) *EventsController {
 
 	httpGroup := hs.AppGroup.Group("/events")
 	httpGroup.Use(httpServer.ErrorHandler())
 
-	hs.AppGroup = httpGroup
-
 	controller := &EventsController{
-		conf:               conf,
-		httpServer:         hs,
-		createEventUsecase: createEventUsecase,
-		deleteEventUsecase: deleteEventUsecase,
-		updateEventUsecase: updateEventUsecase,
-		getEventsQuery:     getEventsQuery,
-		getEventByIdQuery:  getEventByIdQuery,
+		conf:                  conf,
+		httpServer:            hs,
+		createEventUsecase:    createEventUsecase,
+		deleteEventUsecase:    deleteEventUsecase,
+		updateEventUsecase:    updateEventUsecase,
+		getEventsQuery:        getEventsQuery,
+		getEventByIdQuery:     getEventByIdQuery,
+		getEventByUserIdQuery: getEventByUserIdQuery,
 	}
 
-	controller.registerRoutes()
+	controller.registerRoutes(httpGroup)
 
 	return controller
 }
 
-func (ec *EventsController) registerRoutes() {
-	ec.httpServer.AppGroup.GET("/health", ec.health)
-	ec.httpServer.AppGroup.GET("", ec.getEvents)
-	ec.httpServer.AppGroup.GET("/:id", ec.getEventById)
-	ec.httpServer.AppGroup.POST("", ec.createEvent)
-	ec.httpServer.AppGroup.PUT("/:id", ec.updateEvent)
-	ec.httpServer.AppGroup.DELETE("/:id", ec.deleteEvent)
-
+func (ec *EventsController) registerRoutes(group *gin.RouterGroup) {
+	group.GET("/health", ec.health)
+	group.GET("", ec.getEvents)
+	group.GET("/:id", ec.getEventById)
+	group.GET("/user/:userId", ec.getEventByUserId)
+	group.POST("", httpServer.AuthenticationHandler(ec.conf), ec.createEvent)
+	group.PUT("/:id", httpServer.AuthenticationHandler(ec.conf), ec.updateEvent)
+	group.DELETE("/:id", httpServer.AuthenticationHandler(ec.conf), ec.deleteEvent)
 }
 
 func (ec *EventsController) health(ctx *gin.Context) {
@@ -84,6 +85,8 @@ func (ec *EventsController) createEvent(ctx *gin.Context) {
 		return
 	}
 
+	event.UserId = ctx.Request.Header.Get("X-User-Id")
+
 	result, err := ec.createEventUsecase.Execute(ctx, &event)
 
 	if err != nil {
@@ -107,10 +110,25 @@ func (ec *EventsController) getEventById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-func (ec *EventsController) deleteEvent(ctx *gin.Context) {
-	id := ctx.Param("id")
+func (ec *EventsController) getEventByUserId(ctx *gin.Context) {
+	userId := ctx.Param("userId")
 
-	result, err := ec.deleteEventUsecase.Execute(ctx, id)
+	result, err := ec.getEventByUserIdQuery.Execute(ctx, userId)
+
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
+}
+
+func (ec *EventsController) deleteEvent(ctx *gin.Context) {
+	var event usecases.DeleteEventDTO
+	event.Id = ctx.Param("id")
+	event.UserId = ctx.Request.Header.Get("X-User-Id")
+
+	result, err := ec.deleteEventUsecase.Execute(ctx, &event)
 
 	if err != nil {
 		ctx.Error(err)
@@ -131,6 +149,7 @@ func (ec *EventsController) updateEvent(ctx *gin.Context) {
 	}
 
 	event.Id = id
+	event.UserId = ctx.Request.Header.Get("X-User-Id")
 
 	result, err := ec.updateEventUsecase.Execute(ctx, &event)
 

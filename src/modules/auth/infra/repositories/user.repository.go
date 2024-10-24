@@ -8,6 +8,7 @@ import (
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/models"
 	"github.com/thmelodev/ddd-events-api/src/providers/db"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
+	"github.com/thmelodev/ddd-events-api/src/utils/hash"
 	"gorm.io/gorm"
 )
 
@@ -29,6 +30,14 @@ func NewUserRepository(db *db.GormDatabase, userMapper *mappers.UserMapper) *Use
 
 func (r *UserRepository) Save(u *domain.UserAggregate) error {
 	model := r.userMapper.ToModel(u)
+
+	hashedPassword, err := hash.HashPassword(model.Password)
+
+	if err != nil {
+		return apiErrors.NewRepositoryError(fmt.Errorf("failed to hash password: %w", err).Error())
+	}
+
+	model.Password = hashedPassword
 
 	if err := r.db.DB.Save(model).Error; err != nil {
 		return err

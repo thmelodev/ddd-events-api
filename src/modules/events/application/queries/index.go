@@ -1,3 +1,3 @@
 package queries
 
-var Queries = []interface{}{NewGetEventsQuery, NewGetEventsQueryById}
+var Queries = []interface{}{NewGetEventsQuery, NewGetEventsQueryById, NewGetEventByUserIdQuery}

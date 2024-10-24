@@ -16,6 +16,7 @@ var _ IEventRepository = (*EventRepository)(nil)
 type IEventRepository interface {
 	Save(event *domain.EventAggregate) error
 	FindById(id string) (*domain.EventAggregate, error)
+	FindByUserId(id string) ([]*domain.EventAggregate, error)
 	FindAll() ([]*domain.EventAggregate, error)
 	Delete(event *domain.EventAggregate) error
 }
@@ -74,6 +75,24 @@ func (r *EventRepository) FindById(id string) (*domain.EventAggregate, error) {
 	}
 
 	return eventAggregate, nil
+}
+
+func (r *EventRepository) FindByUserId(id string) ([]*domain.EventAggregate, error) {
+	var models []*models.EventModel
+	if err := r.db.DB.Where("user_id = ?", id).Find(&models).Error; err != nil {
+		return nil, apiErrors.NewRepositoryError(fmt.Errorf("failed to find all events: %w", err).Error())
+	}
+
+	var events []*domain.EventAggregate
+	for _, model := range models {
+		e, err := r.eventMapper.ToDomain(model)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, e)
+	}
+
+	return events, nil
 }
 
 func (r *EventRepository) Delete(event *domain.EventAggregate) error {

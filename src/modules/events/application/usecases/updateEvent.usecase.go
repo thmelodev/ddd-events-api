@@ -24,7 +24,7 @@ type UpdateEventDTO struct {
 	Description string    `json:"description"`
 	Location    string    `json:"location"`
 	DateTime    time.Time `json:"dateTime"`
-	UserId      string    `json:"userId"`
+	UserId      string    `json:"-"`
 }
 
 func NewUpdateEventUsecase(
@@ -46,6 +46,10 @@ func (u UpdateEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if e.GetUserId() != eventDTO.UserId {
+		return nil, apiErrors.NewUnauthorizedError("user is not the owner of this event")
 	}
 
 	err = e.UpdateEvent(domain.EventProps{

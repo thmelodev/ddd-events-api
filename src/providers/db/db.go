@@ -7,6 +7,7 @@ import (
 	usersModels "github.com/thmelodev/ddd-events-api/src/modules/auth/infra/models"
 	eventsModel "github.com/thmelodev/ddd-events-api/src/modules/events/infra/models"
 	"github.com/thmelodev/ddd-events-api/src/providers/config"
+	"github.com/thmelodev/ddd-events-api/src/utils/hash"
 	"github.com/thmelodev/ddd-events-api/src/utils/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -69,30 +70,39 @@ func NewDatabase(config *config.Config) (*GormDatabase, error) {
 
 	db.AutoMigrate(&eventsModel.EventModel{}, &usersModels.UserModel{})
 
-	createAdminUser(db)
+	createAdminUser(db, config)
 
 	return &GormDatabase{
 		DB: db,
 	}, nil
 }
 
-func createAdminUser(db *gorm.DB) {
+func createAdminUser(db *gorm.DB, config *config.Config) {
 	var admin usersModels.UserModel
 	result := db.First(&admin, "email = ?", "admin@teste.com")
 
+	hashedPassword, err := hash.HashPassword("123456")
+
+	if err != nil {
+		panic(fmt.Errorf("failed to hash admin password: %v", err))
+	}
+
 	if result.Error != nil && result.Error == gorm.ErrRecordNotFound {
 		admin = usersModels.UserModel{
+			Id:       config.App.AdminId,
 			Email:    "admin@teste.com",
-			Password: "123456",
+			Password: hashedPassword,
 		}
 
-		if err := db.Create(&admin).Error; err != nil {
-			fmt.Printf("Failed to create admin user: %v\n", err)
+		err = db.Create(&admin).Error
+
+		if err != nil {
+			panic(fmt.Errorf("failed to create admin user: %v", err))
 		} else {
 			fmt.Println("Admin user created successfully.")
 		}
 	} else if result.Error != nil {
-		fmt.Printf("Error checking admin user: %v\n", result.Error)
+		panic(fmt.Errorf("error checking admin user: %v", result.Error))
 	} else {
 		fmt.Println("Admin user already exists.")
 	}

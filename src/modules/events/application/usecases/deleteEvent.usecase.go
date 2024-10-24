@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
 
@@ -23,13 +24,26 @@ func NewDeleteEventUsecase(
 	}
 }
 
-func (u DeleteEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
-	id := fmt.Sprint(dto)
+type DeleteEventDTO struct {
+	Id     string `json:"-"`
+	UserId string `json:"-"`
+}
 
-	event, err := u.eventRepository.FindById(id)
+func (u DeleteEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
+	eventDTO, ok := dto.(*DeleteEventDTO)
+
+	if !ok {
+		return nil, apiErrors.NewInvalidPropsError(fmt.Errorf("invalid props: %v, invalid type: %t", dto, dto).Error())
+	}
+
+	event, err := u.eventRepository.FindById(eventDTO.Id)
 
 	if err != nil {
 		return nil, err
+	}
+
+	if event.GetUserId() != eventDTO.UserId {
+		return nil, apiErrors.NewInvalidPropsError("user is not the owner of this event")
 	}
 
 	if err = u.eventRepository.Delete(event); err != nil {

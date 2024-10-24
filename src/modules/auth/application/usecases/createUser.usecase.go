@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/providers/config"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
@@ -15,18 +16,22 @@ var _ interfaces.IUsecase = (*CreateUserUsecase)(nil)
 
 type CreateUserUsecase struct {
 	userRepository repositories.IUserRepository
+	config         *config.Config
 }
 
 type CreateUserDTO struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	UserId   string `json:"-"`
 }
 
 func NewCreateUserUsecase(
 	userRepository repositories.IUserRepository,
+	config *config.Config,
 ) *CreateUserUsecase {
 	return &CreateUserUsecase{
 		userRepository: userRepository,
+		config:         config,
 	}
 }
 
@@ -35,6 +40,10 @@ func (u CreateUserUsecase) Execute(context context.Context, dto any) (any, error
 
 	if !ok {
 		return nil, apiErrors.NewInvalidPropsError(fmt.Errorf("invalid props: %v, invalid type: %t", dto, dto).Error())
+	}
+
+	if userDTO.UserId != u.config.App.AdminId {
+		return nil, apiErrors.NewUnauthorizedError("only admin can create users")
 	}
 
 	userExist, _ := u.userRepository.FindByEmail(userDTO.Email)
