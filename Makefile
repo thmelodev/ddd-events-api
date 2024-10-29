@@ -21,3 +21,6 @@ run:
 
 debug:
 	@dlv --listen=127.0.0.1:8181 --headless --api-version=2 --accept-multiclient --check-go-version=false debug ./src --log -- ${command}
+
+test:
+	@go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html

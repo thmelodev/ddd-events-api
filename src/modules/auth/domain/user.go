@@ -34,9 +34,13 @@ func NewUser(props UserProps) (*UserAggregate, error) {
 func LoadUser(props UserProps, id string) (*UserAggregate, error) {
 	user := &UserAggregate{}
 
-	user.setId(id)
+	err := user.setId(id)
 
-	err := user.build(props)
+	if err != nil {
+		return nil, err
+	}
+
+	err = user.build(props)
 
 	if err != nil {
 		return nil, err
@@ -88,7 +92,7 @@ func (u *UserAggregate) setEmail(e string) error {
 
 func (u *UserAggregate) setPassword(password string) error {
 	if len(password) < 6 {
-		return apiErrors.NewInvalidPropsError("password must be at least 6 characters long")
+		return apiErrors.NewInvalidPropsError("password must be at least 6 characters")
 	}
 
 	u.password = password
