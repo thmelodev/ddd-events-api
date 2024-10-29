@@ -1,12 +1,12 @@
 package events
 
 import (
+	applicationMapper "github.com/thmelodev/ddd-events-api/src/modules/events/application/mappers"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/application/queries"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/application/usecases"
-
-	applicationMapper "github.com/thmelodev/ddd-events-api/src/modules/events/application/mappers"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/repositories"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/mappers"
-	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
+	infraRepositories "github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
 	"go.uber.org/fx"
 )
 
@@ -14,7 +14,7 @@ func Module() fx.Option {
 	return fx.Module(
 		"events",
 		fx.Provide(
-			fx.Annotate(repositories.NewEventRepository, fx.As(new(repositories.IEventRepository))),
+			fx.Annotate(infraRepositories.NewEventRepository, fx.As(new(repositories.IEventRepository))),
 		),
 		fx.Provide(applicationMapper.NewEventMapper),
 		fx.Provide(mappers.NewEventMapper),

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/thmelodev/ddd-events-api/src/modules/events/application/mappers"
-	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/repositories"
 	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
 

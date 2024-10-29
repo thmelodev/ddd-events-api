@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain"
-	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain/repositories"
 	"github.com/thmelodev/ddd-events-api/src/providers/config"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"

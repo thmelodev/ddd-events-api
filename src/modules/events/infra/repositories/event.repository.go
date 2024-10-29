@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/thmelodev/ddd-events-api/src/modules/events/domain"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/repositories"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/mappers"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/models"
 	"github.com/thmelodev/ddd-events-api/src/providers/db"
@@ -11,15 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var _ IEventRepository = (*EventRepository)(nil)
-
-type IEventRepository interface {
-	Save(event *domain.EventAggregate) error
-	FindById(id string) (*domain.EventAggregate, error)
-	FindByUserId(id string) ([]*domain.EventAggregate, error)
-	FindAll() ([]*domain.EventAggregate, error)
-	Delete(event *domain.EventAggregate) error
-}
+var _ repositories.IEventRepository = (*EventRepository)(nil)
 
 type EventRepository struct {
 	db          *db.GormDatabase

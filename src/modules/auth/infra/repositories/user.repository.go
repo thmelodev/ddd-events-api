@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain"
+	"github.com/thmelodev/ddd-events-api/src/modules/auth/domain/repositories"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/mappers"
 	"github.com/thmelodev/ddd-events-api/src/modules/auth/infra/models"
 	"github.com/thmelodev/ddd-events-api/src/providers/db"
@@ -12,12 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var _ IUserRepository = (*UserRepository)(nil)
-
-type IUserRepository interface {
-	Save(u *domain.UserAggregate) error
-	FindByEmail(email string) (*domain.UserAggregate, error)
-}
+var _ repositories.IUserRepository = (*UserRepository)(nil)
 
 type UserRepository struct {
 	db         *db.GormDatabase

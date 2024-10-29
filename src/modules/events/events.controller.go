@@ -79,7 +79,7 @@ func (ec *EventsController) getEvents(ctx *gin.Context) {
 }
 
 func (ec *EventsController) createEvent(ctx *gin.Context) {
-	var event usecases.CreateEventDTO
+	var event usecases.CreateEventUsecaseProps
 	if err := ctx.ShouldBindJSON(&event); err != nil {
 		ctx.Error(apiErrors.NewInvalidPropsError(err.Error()))
 		return
@@ -124,7 +124,7 @@ func (ec *EventsController) getEventByUserId(ctx *gin.Context) {
 }
 
 func (ec *EventsController) deleteEvent(ctx *gin.Context) {
-	var event usecases.DeleteEventDTO
+	var event usecases.DeleteEventProps
 	event.Id = ctx.Param("id")
 	event.UserId = ctx.Request.Header.Get("X-User-Id")
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/repositories"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
@@ -24,13 +24,13 @@ func NewDeleteEventUsecase(
 	}
 }
 
-type DeleteEventDTO struct {
+type DeleteEventProps struct {
 	Id     string `json:"-"`
 	UserId string `json:"-"`
 }
 
 func (u DeleteEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
-	eventDTO, ok := dto.(*DeleteEventDTO)
+	eventDTO, ok := dto.(*DeleteEventProps)
 
 	if !ok {
 		return nil, apiErrors.NewInvalidPropsError(fmt.Errorf("invalid props: %v, invalid type: %t", dto, dto).Error())

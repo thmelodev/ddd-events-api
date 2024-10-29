@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thmelodev/ddd-events-api/src/modules/events/domain"
-	"github.com/thmelodev/ddd-events-api/src/modules/events/infra/repositories"
+	"github.com/thmelodev/ddd-events-api/src/modules/events/domain/repositories"
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 	"github.com/thmelodev/ddd-events-api/src/utils/interfaces"
 )
@@ -18,7 +18,7 @@ type CreateEventUsecase struct {
 	eventRepository repositories.IEventRepository
 }
 
-type CreateEventDTO struct {
+type CreateEventUsecaseProps struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Location    string    `json:"location"`
@@ -35,7 +35,7 @@ func NewCreateEventUsecase(
 }
 
 func (u CreateEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
-	eventDTO, ok := dto.(*CreateEventDTO)
+	eventDTO, ok := dto.(*CreateEventUsecaseProps)
 
 	if !ok {
 		return nil, apiErrors.NewRepositoryError(fmt.Errorf("invalid props: %v, invalid type: %t", dto, dto).Error())

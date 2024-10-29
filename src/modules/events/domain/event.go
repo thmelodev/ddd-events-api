@@ -15,13 +15,6 @@ type EventProps struct {
 	UserId      string
 }
 
-type UpdateEventProps struct {
-	Name        string
-	Description string
-	Location    string
-	DateTime    time.Time
-}
-
 type EventAggregate struct {
 	id          string
 	name        string
