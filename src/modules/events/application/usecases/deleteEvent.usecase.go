@@ -42,6 +42,9 @@ func (u DeleteEventUsecase) Execute(ctx context.Context, dto any) (any, error) {
 		return nil, err
 	}
 
+	fmt.Println("event.GetUserId()", event.GetUserId())
+	fmt.Println("eventDTO.UserId", eventDTO.UserId)
+
 	if event.GetUserId() != eventDTO.UserId {
 		return nil, apiErrors.NewInvalidPropsError("user is not the owner of this event")
 	}
