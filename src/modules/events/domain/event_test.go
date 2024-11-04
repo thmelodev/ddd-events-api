@@ -9,99 +9,190 @@ import (
 	"github.com/thmelodev/ddd-events-api/src/utils/apiErrors"
 )
 
-func TestNewEventSucess(t *testing.T) {
-	userId := uuid.New().String()
+func TestNewEvent(t *testing.T) {
 
-	eventProps := EventProps{
-		Name:        "Test Event",
-		Description: "Test Description",
-		Location:    "Test Location",
-		DateTime:    time.Now(),
-		UserId:      userId,
-	}
+	t.Run("create event success", func(t *testing.T) {
+		userId := uuid.New().String()
 
-	event, err := NewEvent(eventProps)
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      userId,
+		}
 
-	assert.NoError(t, err)
-	assert.NotNil(t, event)
-	assert.Equal(t, eventProps.Name, event.name)
-	assert.Equal(t, eventProps.Description, event.description)
-	assert.Equal(t, eventProps.Location, event.location)
-	assert.Equal(t, eventProps.DateTime, event.dateTime)
-	assert.Equal(t, eventProps.UserId, event.userId)
-}
+		event, err := NewEvent(eventProps)
 
-func TestNewEventError(t *testing.T) {
-	eventProps := EventProps{
-		Name:        "Test Event",
-		Description: "Test Description",
-		Location:    "Test Location",
-		DateTime:    time.Now(),
-		UserId:      "",
-	}
+		assert.NoError(t, err)
+		assert.NotNil(t, event)
+		assert.Equal(t, eventProps.Name, event.GetName())
+		assert.Equal(t, eventProps.Description, event.GetDescription())
+		assert.Equal(t, eventProps.Location, event.GetLocation())
+		assert.Equal(t, eventProps.DateTime, event.GetDateTime())
+		assert.Equal(t, eventProps.UserId, event.GetUserId())
+	})
 
-	event, err := NewEvent(eventProps)
+	t.Run("create event error because userId length === 0", func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      "",
+		}
 
-	assert.Error(t, err)
-	assert.Nil(t, event)
-	assert.Equal(t, apiErrors.NewInvalidPropsError("userId is required"), err)
-}
+		event, err := NewEvent(eventProps)
 
-func TestLoadEventErrorId(t *testing.T) {
-	eventProps := EventProps{
-		Name:        "Test Event",
-		Description: "Test Description",
-		Location:    "Test Location",
-		DateTime:    time.Now(),
-		UserId:      "test",
-	}
+		assert.Error(t, err)
+		assert.Nil(t, event)
+		assert.Equal(t, apiErrors.NewInvalidPropsError("userId is required"), err)
+	})
 
-	event, err := LoadEvent(eventProps, "")
+	t.Run("create event error because name length === 0", func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      uuid.New().String(),
+		}
 
-	assert.Error(t, err)
-	assert.Nil(t, event)
-	assert.Equal(t, apiErrors.NewInvalidPropsError("id is invalid"), err)
-}
+		event, err := NewEvent(eventProps)
 
-func TestLoadEventErrorName(t *testing.T) {
-	eventProps := EventProps{
-		Name:        "",
-		Description: "Test Description",
-		Location:    "Test Location",
-		DateTime:    time.Now(),
-		UserId:      "test",
-	}
+		assert.Error(t, err)
+		assert.Nil(t, event)
+		assert.Equal(t, apiErrors.NewInvalidPropsError("name is required"), err)
+	})
 
-	event, err := LoadEvent(eventProps, uuid.New().String())
+	t.Run("create event error because description length === 0", func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      uuid.New().String(),
+		}
 
-	assert.Error(t, err)
-	assert.Nil(t, event)
-	assert.Equal(t, apiErrors.NewInvalidPropsError("name is required"), err)
-}
+		event, err := NewEvent(eventProps)
 
-func TestUpdateEventSuccess(t *testing.T) {
-	eventProps := EventProps{
-		Name:        "Test Event",
-		Description: "Test Description",
-		Location:    "Test Location",
-		DateTime:    time.Now(),
-		UserId:      "test",
-	}
+		assert.Error(t, err)
+		assert.Nil(t, event)
+		assert.Equal(t, apiErrors.NewInvalidPropsError("description is required"), err)
+	})
 
-	event, _ := NewEvent(eventProps)
+	t.Run("create event error because location length === 0", func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "Test Description",
+			Location:    "",
+			DateTime:    time.Now(),
+			UserId:      uuid.New().String(),
+		}
 
-	updateEventProps := EventProps{
-		Name:        "Test Event Updated",
-		Description: "Test Description Updated",
-		Location:    "Test Location Updated",
-		DateTime:    time.Now(),
-	}
+		event, err := NewEvent(eventProps)
 
-	err := event.UpdateEvent(updateEventProps)
+		assert.Error(t, err)
+		assert.Nil(t, event)
+		assert.Equal(t, apiErrors.NewInvalidPropsError("location is required"), err)
+	})
 
-	assert.NoError(t, err)
-	assert.Equal(t, updateEventProps.Name, event.name)
-	assert.Equal(t, updateEventProps.Description, event.description)
-	assert.Equal(t, updateEventProps.Location, event.location)
-	assert.Equal(t, updateEventProps.DateTime, event.dateTime)
+	t.Run("create event error because dateTime is zero", func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Time{},
+			UserId:      uuid.New().String(),
+		}
+
+		event, err := NewEvent(eventProps)
+
+		assert.Error(t, err)
+		assert.Nil(t, event)
+		assert.Equal(t, apiErrors.NewInvalidPropsError("dateTime is required"), err)
+	})
+
+	t.Run("create event error because id is invalid", (func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      "test",
+		}
+
+		event, err := LoadEvent(eventProps, "")
+
+		assert.Error(t, err)
+		assert.Nil(t, event)
+		assert.Equal(t, apiErrors.NewInvalidPropsError("id is invalid"), err)
+	}))
+
+	t.Run("update event success", func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      "test",
+		}
+
+		event, _ := NewEvent(eventProps)
+
+		updateEventProps := EventProps{
+			Name:        "Test Event Updated",
+			Description: "Test Description Updated",
+			Location:    "Test Location Updated",
+			DateTime:    time.Now(),
+		}
+
+		err := event.UpdateEvent(updateEventProps)
+
+		assert.NoError(t, err)
+		assert.Equal(t, updateEventProps.Name, event.name)
+		assert.Equal(t, updateEventProps.Description, event.description)
+		assert.Equal(t, updateEventProps.Location, event.location)
+		assert.Equal(t, updateEventProps.DateTime, event.dateTime)
+	})
+
+	t.Run("Load event sucess", func(t *testing.T) {
+		id := uuid.New().String()
+
+		eventProps := EventProps{
+			Name:        "Test Event",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      "test",
+		}
+
+		event, err := LoadEvent(eventProps, id)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, event)
+		assert.Equal(t, event.GetId(), event.GetId())
+		assert.Equal(t, eventProps.Name, event.GetName())
+		assert.Equal(t, eventProps.Description, event.GetDescription())
+		assert.Equal(t, eventProps.Location, event.GetLocation())
+		assert.Equal(t, eventProps.DateTime, event.GetDateTime())
+		assert.Equal(t, eventProps.UserId, event.GetUserId())
+	})
+
+	t.Run("Load event error build", (func(t *testing.T) {
+		eventProps := EventProps{
+			Name:        "",
+			Description: "Test Description",
+			Location:    "Test Location",
+			DateTime:    time.Now(),
+			UserId:      "test",
+		}
+
+		event, err := LoadEvent(eventProps, uuid.NewString())
+
+		assert.Error(t, err)
+		assert.Nil(t, event)
+		assert.Equal(t, apiErrors.NewInvalidPropsError("name is required"), err)
+	}))
+
 }
